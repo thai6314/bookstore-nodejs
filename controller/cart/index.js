@@ -59,11 +59,13 @@ module.exports = {
       const rs = await Cart.findOne({ user: user }, "-__v").lean();
 
       let dt = [];
+      let sumPrice = 0;
       for (let [idx, bks] of rs.book.entries()) {
         const itembook = await ItemBook.findOne(
           { book: bks },
           "-amount"
         ).populate("book");
+        sumPrice += itembook.price * rs.quantity[idx];
         const value = {
           book: itembook,
           quantity: rs.quantity[idx],
@@ -74,6 +76,7 @@ module.exports = {
       res.json({
         message: "Get cart successfully",
         data: dt,
+        total: sumPrice,
       });
     } catch (error) {
       res.status.json(error);
