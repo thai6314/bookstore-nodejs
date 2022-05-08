@@ -11,16 +11,31 @@ module.exports = {
     try {
       const tmp = req.body;
 
-      let total = [];
-      for (let i = 0; i < tmp.quantity.length; i++) {
-        const itembook = await ItemBook.findOne({ book: tmp.book[i] }).lean();
-        const sum = itembook.price * tmp.quantity[i];
-        total.push(sum);
-      }
-
-      const user = tmp.user;
-      const rs = await Cart.findOne({ user: user }).lean();
-      if (!rs) {
+      const isUser = await Cart.findOne({ user: tmp.user }).lean();
+      if (isUser) {
+        const rs = await Cart.findByIdAndUpdate(isUser._id, {
+          quantity: tmp.quantity,
+          book: tmp.book,
+        });
+        for (let [idx, check] of tmp.book.entries()) {
+          const isQuantity = await ItemBook.findOne({ book: check }).lean();
+          if (tmp.quantity[idx] > isQuantity.amount || tmp.quantity[idx] < 0) {
+            res.json({
+              message: "Quantity book is invaild",
+            });
+          }
+        }
+        res.json({
+          message: "Update card successfully",
+          data: rs,
+        });
+      } else {
+        let total = [];
+        for (let i = 0; i < tmp.quantity.length; i++) {
+          const itembook = await ItemBook.findOne({ book: tmp.book[i] }).lean();
+          const sum = itembook.price * tmp.quantity[i];
+          total.push(sum);
+        }
         const dataCart = {
           quantity: [...tmp.quantity],
           total_price: calculateTotal(total),
@@ -29,41 +44,13 @@ module.exports = {
         };
 
         const cart = new Cart(dataCart);
+        console.log(cart);
         await cart.save();
         res.json({
           message: "Add to cart successfully",
         });
-      } else {
-        for (let i = 0; i < rs.book.length; i++) {
-          for (let j = 0; j < tmp.book.length; j++) {
-            if (rs.book[i] === tmp.book[j]) {
-              rs.quantity[i] = rs.quantity[i] + tmp.quantity[j];
-              tmp.book.removeAt(j);
-              console.log(rs);
-            } else {
-              rs.book.push(tmp.book[j]);
-              rs.quantity.push(tmp.quantity[j]);
-            }
-          }
-        }
-        let totalUpdate = [];
-
-        for (let i = 0; i < rs.book.length; i++) {
-          const itembook = await ItemBook.findOne({ book: rs.book[i] }).lean();
-          const sum = itembook.price * rs.quantity[i];
-          console.log(sum);
-          totalUpdate.push(sum);
-        }
-        const cartUpdate = await Cart.findByIdAndUpdate(rs._id, {
-          quantity: rs.quantity,
-          total_price: calculateTotal(totalUpdate),
-          book: rs.book,
-        });
-        res.json({
-          message: "Update cart successfully",
-          data: cartUpdate,
-        });
       }
+      return;
     } catch (error) {
       res.status(403).json({ error: error });
     }
