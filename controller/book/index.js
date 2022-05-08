@@ -21,6 +21,7 @@ module.exports = {
 
       const dataBook = {
         title: tmp.title,
+        discription: tmp.discription,
         number_of_pages: tmp.number_of_pages,
         language: tmp.language,
         publication_date: tmp.publication_date,

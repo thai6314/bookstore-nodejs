@@ -1,6 +1,6 @@
 const Address = require("../../model/user/address");
 const Role = require("../../model/user/role");
-const User = require("../../model/user/User");
+const User = require("../../model/user/user");
 const Account = require("../../model/user/account");
 const bcryptjs = require("bcryptjs");
 const {
@@ -76,8 +76,8 @@ module.exports = {
       const response = await Account.find();
 
       let data = [];
-      for (let account of response) {
-        const rs = await Account.findById(account._id, "-__v -password")
+      for (let a of response) {
+        const rs = await Account.findById(a._id, "-__v -password")
           .populate("role", "-__v -_id")
           .populate("user", "-__v ")
           .lean();
@@ -96,7 +96,7 @@ module.exports = {
       const { username } = req.query;
       const data = await Account.findOne({ username: username }, "-__v")
         .populate("role", "-__v -_id")
-        .populate("user", "-__v -_id")
+        .populate("user", "-__v ")
         .lean();
       res.json({
         data,

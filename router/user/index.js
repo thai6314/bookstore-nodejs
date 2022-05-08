@@ -11,7 +11,7 @@ const {
 const userRouter = express.Router();
 
 userRouter.post("/user/register", createUser);
-userRouter.get("/user", requireLogin, getUser);
+userRouter.get("/user", getUser);
 userRouter.post("/user/role/create", createRole);
 userRouter.get("/user/role", getRole);
 userRouter.get("/user/detail", requireLogin, getOneUser);

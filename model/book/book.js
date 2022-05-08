@@ -6,6 +6,11 @@ const Book = new mongoose.Schema({
     require: true,
     trim: true,
   },
+  description: {
+    type: String,
+    require: true,
+    trim: true,
+  },
   number_of_pages: {
     type: Number,
     trim: true,
