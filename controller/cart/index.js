@@ -10,29 +10,47 @@ module.exports = {
   async createCart(req, res, next) {
     try {
       const tmp = req.body;
-      //   for(let b of tmp.book ){
-      //     const itembook = await ItemBook.findOne({ book: b }).lean();
 
-      //   }
-      let total = [];
-      for (let i = 0; i < tmp.quantity.length; i++) {
-        const itembook = await ItemBook.findOne({ book: tmp.book[i] }).lean();
-        const sum = itembook.price * tmp.quantity[i];
-        total.push(sum);
+      const isUser = await Cart.findOne({ user: tmp.user }).lean();
+      if (isUser) {
+        const rs = await Cart.findByIdAndUpdate(isUser._id, {
+          quantity: tmp.quantity,
+          book: tmp.book,
+        });
+        for (let [idx, check] of tmp.book.entries()) {
+          const isQuantity = await ItemBook.findOne({ book: check }).lean();
+          if (tmp.quantity[idx] > isQuantity.amount || tmp.quantity[idx] < 0) {
+            res.json({
+              message: "Quantity book is invaild",
+            });
+          }
+        }
+        res.json({
+          message: "Update card successfully",
+          data: rs,
+        });
+      } else {
+        let total = [];
+        for (let i = 0; i < tmp.quantity.length; i++) {
+          const itembook = await ItemBook.findOne({ book: tmp.book[i] }).lean();
+          const sum = itembook.price * tmp.quantity[i];
+          total.push(sum);
+        }
+        const dataCart = {
+          quantity: [...tmp.quantity],
+          total_price: calculateTotal(total),
+          book: [...tmp.book],
+          user: tmp.user,
+        };
+
+        const cart = new Cart(dataCart);
+        console.log(cart);
+        await cart.save();
+        res.json({
+          message: "Add to cart successfully",
+        });
       }
-      const dataCart = {
-        quantity: [...tmp.quantity],
-        total_price: calculateTotal(total),
-        book: [...tmp.book],
-        user: tmp.user,
-      };
-
-      const cart = new Cart(dataCart);
-      console.log(cart);
-      await cart.save();
-      res.json({
-        message: "Add to cart successfully",
-      });
+      return;
     } catch (error) {
       res.status(403).json({ error: error });
     }
