@@ -13,10 +13,6 @@ module.exports = {
 
       const isUser = await Cart.findOne({ user: tmp.user }).lean();
       if (isUser) {
-        const rs = await Cart.findByIdAndUpdate(isUser._id, {
-          quantity: tmp.quantity,
-          book: tmp.book,
-        });
         for (let [idx, check] of tmp.book.entries()) {
           const isQuantity = await ItemBook.findOne({ book: check }).lean();
           if (tmp.quantity[idx] > isQuantity.amount || tmp.quantity[idx] < 0) {
@@ -25,9 +21,12 @@ module.exports = {
             });
           }
         }
+        await Cart.findByIdAndUpdate(isUser._id, {
+          quantity: tmp.quantity,
+          book: tmp.book,
+        });
         res.json({
           message: "Update card successfully",
-          data: rs,
         });
       } else {
         let total = [];
@@ -44,7 +43,6 @@ module.exports = {
         };
 
         const cart = new Cart(dataCart);
-        console.log(cart);
         await cart.save();
         res.json({
           message: "Add to cart successfully",
@@ -94,12 +92,4 @@ module.exports = {
       res.status(403).json(error);
     }
   },
-
-  // async updateCart(req, res, next) {
-  //   try {
-  //     const { user } = req.query;
-  //   } catch (error) {
-  //     res.status(403).json({ error });
-  //   }
-  // },
 };

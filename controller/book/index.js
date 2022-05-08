@@ -53,7 +53,6 @@ module.exports = {
   async getBook(req, res, next) {
     try {
       const response = await AuthorBook.find();
-      console.log(response);
       let data = [];
       for (let tmp of response) {
         const rs = await Book.findById(tmp.book, "-__v")
@@ -81,7 +80,7 @@ module.exports = {
         data,
       });
     } catch (error) {
-      res.statu(404).json(error);
+      res.status(404).json(error);
     }
   },
 };

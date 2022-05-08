@@ -7,7 +7,6 @@ module.exports = {
       const { username, password } = req.body;
 
       const isUser = await Account.findOne({ username: username });
-      console.log(isUser);
       if (!isUser) {
         res.status(403).json({ message: "Username or password is invalid" });
       } else {
@@ -17,7 +16,7 @@ module.exports = {
           const accessToken = createToken({
             account: isUser,
           });
-          const user = await Account.findOne(
+          const data = await Account.findOne(
             { username: username },
             "-password -__v"
           )
@@ -28,7 +27,7 @@ module.exports = {
           return res.status(200).json({
             message: "Login successful",
             access_token: accessToken,
-            user: user,
+            user: data,
           });
         }
       }
