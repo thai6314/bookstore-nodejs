@@ -6,22 +6,22 @@ const Book = require("../../model/book/book");
 module.exports = {
   async createOrder(req, res, next) {
     try {
-      const tmp = await req.body;
+      const tmp = req.body;
 
-      const cart = await Cart.findOne({ user: tmp.user }).lean();
-      if (!cart) {
-        res.status(403).json({ message: "Cart is not found" });
+      const isCart = await Order.findOne({ cart: tmp.cart });
+      if (isCart) {
+        res.status(403).json({ message: "Order has already exits" });
       } else {
-        const dataOrder = {
-          user: tmp.user,
-          //status: false,
-        };
-
-        const order = new Order(dataOrder);
+        const order = new Order({
+          cart: tmp.cart,
+        });
         await order.save();
+        await Cart.findByIdAndUpdate(tmp.cart, {
+          is_order: true,
+        });
         res.json({
           message: "Create order successfully",
-          user: dataOrder,
+          data: order,
         });
       }
     } catch (error) {
@@ -31,45 +31,13 @@ module.exports = {
 
   async getOrder(req, res, next) {
     try {
-      const { user } = req.query;
+      const isCart = await Order.findOne({ cart: req.query.cart }).populate(
+        "cart"
+      );
 
-      const c = await Cart.findOne({ user: user });
-      const o = await Order.findOne({ user: user });
-      const userFind = await User.findById(user).populate("address");
-      let dt = [];
-      for (let [idx, bks] of c.book.entries()) {
-        const itembook = await ItemBook.findOne(
-          { book: bks },
-          "-amount"
-        ).populate({
-          path: "book",
-
-          populate: [
-            {
-              path: "author",
-            },
-            {
-              path: "category",
-            },
-            {
-              path: "publisher",
-            },
-          ],
-        });
-
-        const value = {
-          book: itembook,
-          quantity: c.quantity[idx],
-          total_price: c.quantity[idx] * itembook.price,
-        };
-        dt.push(value);
-      }
-      res.json({
-        _id: o._id,
-        user: userFind,
-        cart: dt,
-        total: c.total_price,
-        status: o.status,
+      res.status(200).json({
+        message: "Get cart successfully",
+        data: isCart,
       });
     } catch (error) {
       res.status(403).json(error);

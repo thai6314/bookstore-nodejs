@@ -9,10 +9,13 @@ const Cart = mongoose.Schema({
     require: true,
   },
 
-  book: {
+  item_book: {
     type: Array,
     require: true,
-    ref: "Book",
+  },
+  is_order: {
+    type: Boolean,
+    default: false,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

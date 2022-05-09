@@ -19,16 +19,16 @@ function sortObject(obj) {
 }
 module.exports = {
   async createPayment(req, res, next) {
-    const { user } = req.body;
-    if (!user) {
+    const { order } = req.body;
+    if (!order) {
       res.status(401).json({
         status: "error",
         message: "You must be send user before creating payment",
       });
     } else {
-      const o = await Order.findOne({ user: user }).lean();
-      const c = await Cart.find({ user: user }).lean();
-      const payment = await Payment.findById(o._id).populate("order");
+      const o = await Order.findById(order).populate("cart").lean();
+
+      const payment = await Payment.findById(o._id).lean();
 
       if (payment) {
         res.status(403).json({ message: "Payment has already", status: false });
@@ -64,7 +64,7 @@ module.exports = {
         vnp_Params["vnp_TxnRef"] = orderId;
         vnp_Params["vnp_OrderInfo"] = orderInfo;
         vnp_Params["vnp_OrderType"] = orderType;
-        vnp_Params["vnp_Amount"] = c[0]["total_price"] * 100;
+        vnp_Params["vnp_Amount"] = o.cart.total_price * 100;
         vnp_Params["vnp_ReturnUrl"] = returnUrl;
         vnp_Params["vnp_IpAddr"] = ipAddr;
         vnp_Params["vnp_CreateDate"] = createDate;
@@ -111,18 +111,9 @@ module.exports = {
     const p = await Payment.findOne({
       transaction_no: vnp_Params["vnp_TxnRef"],
     }).populate("order");
-    await Order.findByIdAndUpdate(p.order._id, { status: true }).lean();
+    await Order.findByIdAndUpdate(p.order._id, { is_payment: true }).lean();
 
-    const o = await Order.findById(p.order._id).lean();
-    const c = await Cart.findOne({ user: o.user }).lean();
-
-    for (let [idx, bks] of c.book.entries()) {
-      const it = await ItemBook.findOne({ book: bks }).lean();
-      await ItemBook.findByIdAndUpdate(it._id, {
-        amount: it.amount - c.quantity[idx],
-      });
-    }
-    await ItemBook.findByIdAndUpdate();
+    // await ItemBook.findByIdAndUpdate();
     if (secureHash === signed) {
       var orderId = vnp_Params["vnp_TxnRef"];
       var rspCode = vnp_Params["vnp_ResponseCode"];
@@ -132,6 +123,15 @@ module.exports = {
           response_code: rspCode,
         });
       } else {
+        const o = await Order.findById(p.order._id).populate("cart").lean();
+        console.log(o);
+        for (let [idx, item] of o.cart.item_book.entries()) {
+          const it = await ItemBook.findById(item).lean();
+          await ItemBook.findByIdAndUpdate(item, {
+            amount: it.amount - o.cart.quantity[idx],
+          });
+        }
+
         res.json({
           status: "success",
           message: "You have been successfully to payment for this order",
