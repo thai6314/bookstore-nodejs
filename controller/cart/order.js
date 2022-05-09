@@ -34,6 +34,7 @@ module.exports = {
       const { user } = req.query;
 
       const c = await Cart.findOne({ user: user });
+      const o = await Order.findOne({ user: user });
       const userFind = await User.findById(user).populate("address");
       let dt = [];
       for (let [idx, bks] of c.book.entries()) {
@@ -60,12 +61,16 @@ module.exports = {
           book: itembook,
           quantity: c.quantity[idx],
           total_price: c.quantity[idx] * itembook.price,
-          // status: order.status
         };
-        console.log(value);
         dt.push(value);
       }
-      res.json({ user: userFind, cart: dt, total: c.total_price });
+      res.json({
+        _id: o._id,
+        user: userFind,
+        cart: dt,
+        total: c.total_price,
+        status: o.status,
+      });
     } catch (error) {
       res.status(403).json(error);
     }

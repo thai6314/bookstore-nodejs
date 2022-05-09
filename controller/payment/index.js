@@ -1,6 +1,7 @@
 const Payment = require("../../model/payment/payment");
 const Order = require("../../model/cart/order");
 const Cart = require("../../model/cart/cart");
+const ItemBook = require("../../model/book/item_book");
 function sortObject(obj) {
   let sorted = {};
   let str = [];
@@ -96,7 +97,6 @@ module.exports = {
   async getPayment(req, res, next) {
     var vnp_Params = req.query;
     var secureHash = vnp_Params["vnp_SecureHash"];
-    console.log("join");
     delete vnp_Params["vnp_SecureHash"];
     delete vnp_Params["vnp_SecureHashType"];
 
@@ -108,6 +108,21 @@ module.exports = {
     var hmac = crypto.createHmac("sha512", secretKey);
     var signed = hmac.update(new Buffer(signData, "utf-8")).digest("hex");
 
+    const p = await Payment.findOne({
+      transaction_no: vnp_Params["vnp_TxnRef"],
+    }).populate("order");
+    await Order.findByIdAndUpdate(p.order._id, { status: true }).lean();
+
+    const o = await Order.findById(p.order._id).lean();
+    const c = await Cart.findOne({ user: o.user }).lean();
+
+    for (let [idx, bks] of c.book.entries()) {
+      const it = await ItemBook.findOne({ book: bks }).lean();
+      await ItemBook.findByIdAndUpdate(it._id, {
+        amount: it.amount - c.quantity[idx],
+      });
+    }
+    await ItemBook.findByIdAndUpdate();
     if (secureHash === signed) {
       var orderId = vnp_Params["vnp_TxnRef"];
       var rspCode = vnp_Params["vnp_ResponseCode"];

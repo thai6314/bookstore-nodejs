@@ -11,5 +11,5 @@ cartRouter.post("/cart/add", requireLogin, createCart);
 cartRouter.get("/cart", requireLogin, getCart);
 cartRouter.delete("/cart/delete", deleteCart);
 cartRouter.post("/cart/create-order", createOrder);
-cartRouter.get("/cart/order", requireLogin, getOrder);
+cartRouter.get("/cart/order", getOrder);
 module.exports = cartRouter;
