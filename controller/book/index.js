@@ -75,6 +75,7 @@ module.exports = {
       const data = await Book.findById(book_id, "-__v")
         .populate("author", "-__v ")
         .populate("publisher", "-__v")
+        .populate("category", "-__v")
         .lean();
       res.json({
         data,

@@ -15,17 +15,21 @@ module.exports = async (req, res, next) => {
         error: "Unauthorized",
       });
     }
-    let decoded;
-    try {
-      decoded = verifyToken(token);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+    if (token.includes("EAA")) {
+      next();
+    } else {
+      let decoded;
+      try {
+        decoded = verifyToken(token);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+      const account = await Account.findById(decoded.account._id);
+      if (!account) {
+        res.json({ error: "Unauthorization" });
+      }
+      next();
     }
-    const account = await Account.findById(decoded.account._id);
-    if (!account) {
-      res.json({ error: "Unauthorization" });
-    }
-    next();
   } catch (error) {
     res.json({ error: error.message });
   }

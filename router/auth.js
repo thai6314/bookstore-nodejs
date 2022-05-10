@@ -9,11 +9,19 @@ authRoute.get("/auth/facebook", passport.authenticate("facebook"));
 authRoute.get(
   "/auth/facebook/callback",
   passport.authenticate("facebook", {
-    successRedirect: "/",
     failureRedirect: "/login",
   }),
   function (req, res) {
-    res.redirect("/");
+    if (req.user.accessToken) {
+      res.setHeader(req.user.accessToken);
+      res.redirect(
+        `http://localhost:3000/access_token=${req.user.accessToken},user_id=${req.user.user._id}`
+      );
+    } else {
+      res.send({
+        message: "Login failed",
+      });
+    }
   }
 );
 authRoute.get("/cleasession", (req, res) => {

@@ -52,15 +52,16 @@ passport.use(
         const userFb = {
           fb_id: profile.id,
           fullname: profile.displayName,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
         };
         const user = new User(userFb);
 
         const isUser = User.findOne({ user: user.fb_id });
         if (!isUser.fb_id) {
-          console.log(user);
           user.save();
         }
-        return done(null, profile);
+        return done(null, { ...userFb, user });
       });
     }
   )
@@ -87,7 +88,7 @@ app.use("*", (req, res) => {
 });
 
 // Collecting database , host
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 
 connectToDB().then((_) => {
   app.listen(PORT, (_) => {
