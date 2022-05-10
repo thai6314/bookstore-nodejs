@@ -93,26 +93,33 @@ module.exports = {
 
   async getOneUser(req, res, next) {
     try {
-      const { username } = req.query;
-      const data = await Account.findOne(
-        { username: username },
-        "-__v -password"
-      )
-        .populate("role", "-__v -_id")
-        .populate("user", "-__v ")
-        .lean();
+      const { username, user_fb } = req.query;
+      if (user_fb) {
+        const data = await User.findById(user_fb).lean();
+        res.json({
+          user: data,
+        });
+      } else {
+        const data = await Account.findOne(
+          { username: username },
+          "-__v -password"
+        )
+          .populate("role", "-__v -_id")
+          .populate("user", "-__v ")
+          .lean();
 
-      const u = await User.findById(data.user._id)
-        .populate("address", "-__v")
-        .lean();
-      const value = {
-        user: u,
-      };
-      console.log(value);
+        const u = await User.findById(data.user._id)
+          .populate("address", "-__v")
+          .lean();
+        const value = {
+          user: u,
+        };
+        console.log(value);
 
-      res.json({
-        data: value,
-      });
+        res.json({
+          data: value,
+        });
+      }
     } catch (error) {
       res.status(404).json(error);
     }

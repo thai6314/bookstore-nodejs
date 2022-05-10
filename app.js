@@ -52,6 +52,7 @@ passport.use(
         const userFb = {
           fb_id: profile.id,
           fullname: profile.displayName,
+          username: profile.profile,
           accessToken: accessToken,
           refreshToken: refreshToken,
         };
