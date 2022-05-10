@@ -1,4 +1,4 @@
-const book = require("../../model/book/book");
+const Book = require("../../model/book/book");
 const ItemBook = require("../../model/book/item_book");
 
 module.exports = {
@@ -28,9 +28,24 @@ module.exports = {
 
   async getItemBook(req, res, next) {
     try {
-      const response = await ItemBook.find().populate("book");
+      const response = await ItemBook.find();
+      const itemBooks = [];
+      for ([idx, item] of response.entries()) {
+        const book = await Book.findById(item.book, "-__v")
+          .populate("author", "-__v ")
+          .populate("publisher", "-__v")
+          .populate("category", "-__v")
+          .lean();
+
+        const value = {
+          pirce: item.price,
+          amount: item.amount,
+          book,
+        };
+        itemBooks.push(value);
+      }
       res.json({
-        data: response,
+        data: itemBooks,
       });
     } catch (error) {
       res.status.json(error);

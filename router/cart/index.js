@@ -7,8 +7,8 @@ const { createOrder, getOrder } = require("../../controller/cart/order");
 
 const cartRouter = express.Router();
 
-cartRouter.post("/cart/add", createCart);
-cartRouter.get("/cart", getCart);
+cartRouter.post("/cart/add", requireLogin, createCart);
+cartRouter.get("/cart", requireLogin, getCart);
 cartRouter.delete("/cart/delete", deleteCart);
 cartRouter.post("/cart/create-order", createOrder);
 cartRouter.get("/cart/order", getOrder);

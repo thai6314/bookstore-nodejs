@@ -1,5 +1,7 @@
 const Cart = require("../../model/cart/cart");
+const User = require("../../model/user/user");
 const ItemBook = require("../../model/book/item_book");
+const Book = require("../../model/book/book");
 function calculateTotal(array) {
   const sum = array.reduce((acc, currentValue) => {
     return acc + currentValue;
@@ -10,8 +12,7 @@ module.exports = {
   async createCart(req, res, next) {
     try {
       const tmp = req.body;
-      const isUser = await Cart.findOne({ user: tmp.user }).lean();
-      console.log(isUser);
+      const isUser = await Cart.findOne({ user: tmp.user });
       if (isUser) {
         if (!isUser.is_order) {
           let total = [];
@@ -62,9 +63,29 @@ module.exports = {
           });
         }
       } else {
-        res.status(404).json({
-          message: "User not found",
-          status: false,
+        let total = [];
+        for (let [idx, item] of tmp.item_book.entries()) {
+          const itemBook = await ItemBook.findById(item);
+          if (itemBook.amount < tmp.quantity[idx] || tmp.quantity[idx] < 0) {
+            res
+              .status(200)
+              .json({ message: "invalid quantity ", status: false });
+          } else {
+            const sum = itemBook.price * tmp.quantity[idx];
+            total.push(sum);
+          }
+        }
+        const newCart = new Cart({
+          item_book: tmp.item_book,
+          quantity: tmp.quantity,
+          total_price: calculateTotal(total),
+          user: tmp.user,
+        });
+        await newCart.save();
+        res.status(200).json({
+          message: "Create cart successfully",
+          status: 200,
+          data: newCart,
         });
       }
     } catch (error) {
@@ -80,10 +101,21 @@ module.exports = {
       for ([idx, dataCart] of arr.entries()) {
         let itBook = [];
         for (let [i, dataItemBook] of arr[idx].item_book.entries()) {
-          const itemBookFound = await ItemBook.findById(dataItemBook)
-            .populate("book")
+          const itemBookFound = await ItemBook.findById(dataItemBook);
+
+          const b = await Book.findById(itemBookFound.book, "-__v")
+            .populate("author", "-__v ")
+            .populate("publisher", "-__v")
+            .populate("category", "-__v")
             .lean();
-          itBook.push(itemBookFound);
+
+          const value = {
+            _id: itemBookFound._id,
+            price: itemBookFound.price,
+            amount: itemBookFound.amount,
+            book: b,
+          };
+          itBook.push(value);
         }
         console.log(dataCart);
         arrCart.push({

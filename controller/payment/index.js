@@ -27,7 +27,6 @@ module.exports = {
       });
     } else {
       const o = await Order.findById(order).populate("cart").lean();
-
       const payment = await Payment.findById(o._id).lean();
 
       if (payment) {
