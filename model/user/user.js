@@ -16,6 +16,11 @@ const User = new mongoose.Schema({
     require: true,
     trim: true,
   },
+  fb_id: {
+    type: String,
+    require: true,
+    trim: true,
+  },
   address: {
     type: mongoose.Schema.Types.ObjectId,
     require: true,

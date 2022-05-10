@@ -1,4 +1,5 @@
 require("dotenv").config();
+const User = require("./model/user/user");
 const passport = require("passport");
 const express = require("express");
 const cors = require("cors");
@@ -48,7 +49,17 @@ passport.use(
     },
     function (accessToken, refreshToken, profile, done) {
       process.nextTick(function () {
-        console.log(accessToken, refreshToken, profile, done);
+        const userFb = {
+          fb_id: profile.id,
+          fullname: profile.displayName,
+        };
+        const user = new User(userFb);
+
+        const isUser = User.findOne({ user: user.fb_id });
+        if (!isUser.fb_id) {
+          console.log(user);
+          user.save();
+        }
         return done(null, profile);
       });
     }

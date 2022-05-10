@@ -10,8 +10,8 @@ module.exports = {
   async createCart(req, res, next) {
     try {
       const tmp = req.body;
-
       const isUser = await Cart.findOne({ user: tmp.user }).lean();
+      console.log(isUser);
       if (isUser) {
         if (!isUser.is_order) {
           let total = [];

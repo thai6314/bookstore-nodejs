@@ -28,7 +28,7 @@ module.exports = {
 
   async getItemBook(req, res, next) {
     try {
-      const response = await ItemBook.find();
+      const response = await ItemBook.find().populate("book");
       res.json({
         data: response,
       });
