@@ -14,6 +14,6 @@ userRouter.post("/user/register", createUser);
 userRouter.get("/user", getUser);
 userRouter.post("/user/role/create", createRole);
 userRouter.get("/user/role", getRole);
-userRouter.get("/user/detail", requireLogin, getOneUser);
+userRouter.get("/user/detail", getOneUser);
 
 module.exports = userRouter;

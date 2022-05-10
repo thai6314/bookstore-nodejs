@@ -38,7 +38,8 @@ module.exports = {
           .lean();
 
         const value = {
-          pirce: item.price,
+          _id: item._id,
+          price: item.price,
           amount: item.amount,
           book,
         };
@@ -49,6 +50,18 @@ module.exports = {
       });
     } catch (error) {
       res.status.json(error);
+    }
+  },
+
+  async deleteItemBook(req, res, next) {
+    try {
+      const tmp = await req.body;
+      const itemBook = await ItemBook.findById(tmp).populate("book").lean();
+      console.log(itemBook);
+      await Book.findByIdAndUpdate(itemBook.book, { is_active: false }).lean();
+      res.status(200).json({ message: "Delete itembook successfully" });
+    } catch (error) {
+      res.status(403).json(error);
     }
   },
 };

@@ -94,15 +94,27 @@ module.exports = {
   async getOneUser(req, res, next) {
     try {
       const { username } = req.query;
-      const data = await Account.findOne({ username: username }, "-__v")
+      const data = await Account.findOne(
+        { username: username },
+        "-__v -password"
+      )
         .populate("role", "-__v -_id")
         .populate("user", "-__v ")
         .lean();
+
+      const u = await User.findById(data.user._id)
+        .populate("address", "-__v")
+        .lean();
+      const value = {
+        user: u,
+      };
+      console.log(value);
+
       res.json({
-        data,
+        data: value,
       });
     } catch (error) {
-      res.statu(404).json(error);
+      res.status(404).json(error);
     }
   },
 
