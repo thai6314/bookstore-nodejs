@@ -28,7 +28,7 @@ module.exports = {
     } else {
       const o = await Order.findById(order).populate("cart").lean();
       const payment = await Payment.findById(o._id).lean();
-
+      console.log(o);
       if (payment) {
         res.status(403).json({ message: "Payment has already", status: false });
       } else {

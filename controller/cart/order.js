@@ -12,9 +12,7 @@ module.exports = {
       if (isCart) {
         res.status(403).json({ message: "Order has already exits" });
       } else {
-        const order = new Order({
-          cart_id: tmp.cart,
-        });
+        const order = new Order({ cart: tmp.cart });
         await order.save();
         await Cart.findByIdAndUpdate(tmp.cart, {
           is_order: true,
@@ -34,7 +32,7 @@ module.exports = {
       const order = await Order.findOne({ cart: req.query.cart })
         .populate("cart")
         .lean();
-
+      console.log(order);
       const dt = [];
       for ([idx, item] of order.cart.item_book.entries()) {
         const itemBook = await ItemBook.findById(item).lean();
