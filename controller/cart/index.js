@@ -12,8 +12,15 @@ module.exports = {
   async createCart(req, res, next) {
     try {
       const tmp = req.body;
-      const isUser = await Cart.findOne({ user: tmp.user });
+      const carts = await Cart.find({ user: tmp.user });
+      let isUser;
+      for (c of carts) {
+        if (!c.is_order) {
+          isUser = c;
+        }
+      }
       if (isUser) {
+        console.log(isUser.is_order);
         if (!isUser.is_order) {
           let total = [];
           for (let [idx, item] of tmp.item_book.entries()) {
