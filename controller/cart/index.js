@@ -113,6 +113,7 @@ module.exports = {
             _id: itemBookFound._id,
             price: itemBookFound.price,
             amount: itemBookFound.amount,
+            quantity: dataCart.quantity[idx],
             book: b,
           };
           itBook.push(value);
