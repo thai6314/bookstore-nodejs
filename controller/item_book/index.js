@@ -28,7 +28,18 @@ module.exports = {
 
   async getItemBook(req, res, next) {
     try {
-      const response = await ItemBook.find();
+      let response;
+      const {keysearch, item_id} = req.query;
+      if(keysearch) {
+        const book = await Book.findOne({title: {$regex: keysearch, $options: "$i"}})
+        response = await ItemBook.find(({book: book._id}));
+      } 
+      else if(item_id) {
+        response = await ItemBook.find(({_id: item_id}));
+      }
+      else {
+        response = await ItemBook.find();
+      }
       const itemBooks = [];
       for ([idx, item] of response.entries()) {
         const book = await Book.findById(item.book, "-__v")
@@ -55,8 +66,8 @@ module.exports = {
 
   async deleteItemBook(req, res, next) {
     try {
-      const tmp = await req.body;
-      const itemBook = await ItemBook.findById(tmp).populate("book").lean();
+      const {id} = await req.body;
+      const itemBook = await ItemBook.findById(id).populate("book").lean();
       console.log(itemBook);
       if (itemBook) {
         await Book.findByIdAndUpdate(itemBook.book, {
