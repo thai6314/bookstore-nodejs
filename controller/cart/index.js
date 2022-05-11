@@ -20,7 +20,6 @@ module.exports = {
         }
       }
       if (isUser) {
-        console.log(isUser.is_order);
         if (!isUser.is_order) {
           let total = [];
           for (let [idx, item] of tmp.item_book.entries()) {
@@ -34,6 +33,7 @@ module.exports = {
               total.push(sum);
             }
           }
+          console.log(tmp.quantity);
           await Cart.findByIdAndUpdate(isUser._id, {
             quantity: tmp.quantity,
             item_book: tmp.item_book,
@@ -118,9 +118,9 @@ module.exports = {
 
           const value = {
             _id: itemBookFound._id,
-            price: itemBookFound.price,
+            price: itemBookFound.price * dataCart.quantity[i],
             amount: itemBookFound.amount,
-            quantity: dataCart.quantity[idx],
+            quantity: dataCart.quantity[i],
             book: b,
           };
           itBook.push(value);
