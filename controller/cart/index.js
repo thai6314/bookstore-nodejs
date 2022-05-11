@@ -33,7 +33,6 @@ module.exports = {
               total.push(sum);
             }
           }
-          console.log(tmp.quantity);
           await Cart.findByIdAndUpdate(isUser._id, {
             quantity: tmp.quantity,
             item_book: tmp.item_book,
@@ -118,7 +117,7 @@ module.exports = {
 
           const value = {
             _id: itemBookFound._id,
-            price: itemBookFound.price * dataCart.quantity[i],
+            price: itemBookFound.price,
             amount: itemBookFound.amount,
             quantity: dataCart.quantity[i],
             book: b,
