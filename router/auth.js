@@ -13,7 +13,7 @@ authRoute.get(
   }),
   function (req, res) {
     if (req.user.accessToken) {
-      res.setHeader(req.user.accessToken);
+      res.header("authorization", req.user.accessToken);
       res.redirect(
         `http://localhost:3000/access_token=${req.user.accessToken},user_id=${req.user.user._id}`
       );
