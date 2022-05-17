@@ -130,13 +130,13 @@ module.exports = {
             amount: it.amount - o.cart.quantity[idx],
           });
         }
-
-        res.json({
-          status: "success",
-          message: "You have been successfully to payment for this order",
-          order: orderId,
-          response_code: rspCode,
-        });
+        res.redirect('/')
+        // res.json({
+        //   status: "success",
+        //   message: "You have been successfully to payment for this order",
+        //   order: orderId,
+        //   response_code: rspCode,
+        // });
       }
     } else {
       res.status(200).json({ RspCode: "97", Message: "Fail checksum" });

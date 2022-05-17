@@ -15,7 +15,7 @@ authRoute.get(
     if (req.user.accessToken) {
       res.header("authorization", req.user.accessToken);
       res.redirect(
-        `http://localhost:3000/access_token=${req.user.accessToken},user_id=${req.user.user._id}`
+        `${process.env.BACKEND_CALLBACK}/access_token=${req.user.accessToken},user_id=${req.user.user._id}`
       );
     } else {
       res.send({
