@@ -89,10 +89,18 @@ app.use("*", (req, res) => {
 });
 
 // Collecting database , host
-const PORT = process.env.PORT || 8080;
+//const PORT = process.env.PORT || 8080;
 
-connectToDB().then((_) => {
-  app.listen(PORT, (_) => {
-    console.log(`Server started on port ${PORT}`);
-  });
+// connectToDB().then((_) => {
+//   app.listen(PORT, (_) => {
+//     console.log(`Server started on port ${PORT}`);
+//   });
+// });
+
+app.listen(process.env.PORT || 3000, function () {
+  console.log(
+    "Express server listening on port %d in %s mode",
+    this.address().port,
+    app.settings.env
+  );
 });
